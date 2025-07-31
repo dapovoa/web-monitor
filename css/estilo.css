@@ -1,0 +1,101 @@
+/* ===== LAYOUT PRINCIPAL ===== */
+
+.table-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 20px 10px;
+}
+
+.table-wrapper {
+    padding: 10px;
+    min-width: 280px;
+    max-width: 400px;
+}
+
+/* ===== TABELAS ===== */
+
+.table-wrapper table {
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.table-wrapper td,
+.table-wrapper th {
+    border: 1px solid #333;
+    text-align: left;
+    white-space: nowrap;
+    padding: 8px 6px;
+    font-family: Roboto, sans-serif;
+    font-size: 11px;
+}
+
+.table-wrapper th {
+    background-color: #e9ecef;
+    font-weight: 600;
+    color: #212529;
+    border-bottom: 2px solid #666;
+}
+
+/* Cabeçalho principal da tabela */
+table tr:first-child th:first-child {
+    font-weight: 800;
+    font-size: 12px;
+    background-color: #d6d8db;
+    color: #000;
+    text-align: left;
+}
+
+/* ===== ESTADOS DE CONEXÃO ===== */
+
+.online {
+    background-color: #28a745;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 3px;
+}
+
+.offline {
+    background-color: #dc3545;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 3px;
+}
+
+.dot {
+    text-align: center !important;
+}
+
+/* ===== EFEITOS VISUAIS ===== */
+
+.table-wrapper tr:hover {
+    background-color: #f0f0f0;
+}
+
+.table-wrapper tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+
+@media (max-width: 768px) {
+    .table-container {
+        gap: 5px;
+        padding: 10px;
+    }
+    
+    .table-wrapper {
+        min-width: 95%;
+        max-width: 100%;
+    }
+    
+    .table-wrapper td,
+    .table-wrapper th {
+        padding: 6px 4px;
+        font-size: 10px;
+    }
+}
