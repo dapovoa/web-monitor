@@ -20,15 +20,15 @@ Sistema web para monitorização em tempo real do estado de dispositivos de rede
 
 ## Estrutura do Projeto
 
-config.php - Configuração de IPs organizados por categorias
-index.php - Interface principal do dashboard
-ping.php - Engine de verificação de conectividade
-README.md - Documentação do projeto
-css/estilo.css - Estilos responsivos da aplicação
-js/script.js - Lógica para atualizações automáticas
-img/favicon.ico - Ícone do site (formato ICO)
-img/favicon.png - Ícone do site (formato PNG)
-img/screenshot.png - Captura de ecrã do dashboard
+- `config.php` - Configuração de IPs organizados por categorias
+- `index.php` - Interface principal do dashboard
+- `ping.php` - Engine de verificação de conectividade
+- `README.md` - Documentação do projeto
+- `css/estilo.css` - Estilos responsivos da aplicação
+- `js/script.js` - Lógica para atualizações automáticas
+- `img/favicon.ico` - Ícone do site (formato ICO)
+- `img/favicon.png` - Ícone do site (formato PNG)
+- `img/screenshot.png` - Captura de ecrã do dashboard
 
 ## Categorias Disponíveis
 
