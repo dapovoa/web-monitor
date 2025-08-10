@@ -30,48 +30,6 @@ img/favicon.ico - Ícone do site (formato ICO)
 img/favicon.png - Ícone do site (formato PNG)
 img/screenshot.png - Captura de ecrã do dashboard
 
-## Instalação
-
-# Configurar servidor web para PHP
-# Ativar extensões exec() e proc_open()
-# Definir virtual host (opcional)
-
-# Editar configuração
-nano config.php
-
-# Verificar permissões
-chmod 755 *.php
-
-## Configuração
-
-Editar o ficheiro config.php:
-
-```php
-<?php
-$ipsGateways = [
-    '192.168.1.1' => 'Gateway Principal',
-    '192.168.2.1' => 'Gateway Secundário'
-];
-
-$ipsLojas = [
-    '192.168.1.100' => 'PC Loja 1',
-    '192.168.1.101' => 'PC Loja 2'
-];
-
-$ipsWifi = [
-    '192.168.1.50' => 'AP WiFi Loja 1'
-];
-
-$ipsPC = [
-    '192.168.1.200' => 'PC Sede'
-];
-
-$ipsCCTV = [
-    '192.168.1.150' => 'Câmara Principal'
-];
-?>
-```
-
 ## Categorias Disponíveis
 
 - $ipsGateways - Gateways da rede
