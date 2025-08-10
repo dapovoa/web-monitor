@@ -2,76 +2,49 @@
 
 ![Web Monitor](img/screenshot.png)
 
-Sistema web para monitorização em tempo real do estado de ligação de dispositivos de rede através de ping.
+Sistema web para monitorização em tempo real do estado de dispositivos de rede através de ping.
 
 ## Funcionalidades
 
 - Monitorização automática a cada 5 segundos
-- Pings paralelos para maior velocidade (até 6 simultâneos)
+- Pings paralelos (até 6 simultâneos)
+- Interface responsiva com estados Online/Offline
+- Proteção contra injeção de comandos
 - Categorização por tipo de dispositivo
-- Interface responsiva e otimizada
-- Estados visuais Online/Offline com indicadores coloridos
-- **Proteção contra injeção de comandos**
-- **Validação rigorosa de segurança de IPs**
-- **Lista branca de IPs configurados**
-- **Detecção inteligente de respostas de erro** (unreachable, timeout)
-
-## Estrutura do Projeto
-
-**Ficheiros principais:**
-- `config.php` - Configuração de IPs organizados por categorias
-- `index.php` - Interface principal do dashboard  
-- `ping.php` - Engine de verificação de conectividade
-- `README.md` - Documentação do projeto
-
-**Pasta css:**
-- `css\estilo.css` - Estilos responsivos da aplicação
-
-**Pasta img:**
-- `img\favicon.ico` - Ícone do site (ICO)
-- `img\favicon.png` - Ícone do site (PNG)  
-- `img\screenshot.png` - Captura de ecrã do dashboard
-
-**Pasta js:**
-- `js\script.js` - Lógica JavaScript para atualizações automáticas
 
 ## Requisitos
 
-- Servidor Web (Apache/Nginx) com PHP 7.0+
-- Sistema Windows para comando ping
-- Extensões PHP: `exec()` e `proc_open()` habilitadas
+- Servidor Web com PHP 7.0+
+- Sistema Windows
+- Extensões `exec()` e `proc_open()` habilitadas
 
-## Segurança
+## Estrutura do Projeto
 
-### Proteção contra Injeção de Comandos
-- Sanitização rigorosa de IPs (apenas números e pontos)
-- Validação tripla: sanitização + configuração + filter_var()
-- Comando ping fixo com escapeshellarg()
-- Lista branca: apenas IPs do config.php são processados
-- **Detecção de respostas falsas** (router proxy ARP, unreachable)
-
-### Controlo de Acesso
-- Verificação de referer (apenas chamadas do próprio domínio)
-- Sem parâmetros externos aceites via GET/POST
-- Impossível executar comandos via inspect/console
-- Proteção contra bypass de validações
-- Headers de segurança configurados
+config.php - Configuração de IPs organizados por categorias
+index.php - Interface principal do dashboard
+ping.php - Engine de verificação de conectividade
+README.md - Documentação do projeto
+css/estilo.css - Estilos responsivos da aplicação
+js/script.js - Lógica para atualizações automáticas
+img/favicon.ico - Ícone do site (formato ICO)
+img/favicon.png - Ícone do site (formato PNG)
+img/screenshot.png - Captura de ecrã do dashboard
 
 ## Instalação
 
-### Configurar Servidor Web
-- Configurar Apache/Nginx para PHP
-- Ativar extensões `exec()` e `proc_open()` 
-- Configurar virtual host para HTTPS (recomendado)
+# Configurar servidor web para PHP
+# Ativar extensões exec() e proc_open()
+# Definir virtual host (opcional)
 
-### Configurar Aplicação
-- Editar `config.php` com os IPs da sua rede
-- Ajustar timeouts se necessário
-- Verificar permissões de execução
+# Editar configuração
+nano config.php
+
+# Verificar permissões
+chmod 755 *.php
 
 ## Configuração
 
-Editar o ficheiro `config.php` para definir os IPs a monitorizar:
+Editar o ficheiro config.php:
 
 ```php
 <?php
@@ -84,48 +57,40 @@ $ipsLojas = [
     '192.168.1.100' => 'PC Loja 1',
     '192.168.1.101' => 'PC Loja 2'
 ];
+
+$ipsWifi = [
+    '192.168.1.50' => 'AP WiFi Loja 1'
+];
+
+$ipsPC = [
+    '192.168.1.200' => 'PC Sede'
+];
+
+$ipsCCTV = [
+    '192.168.1.150' => 'Câmara Principal'
+];
 ?>
 ```
 
-### Categorias Disponíveis
+## Categorias Disponíveis
 
-- `$ipsGateways` - Gateways da rede
-- `$ipsLojas` - Computadores das lojas
-- `$ipsWifi` - Pontos de acesso WiFi
-- `$ipsPC` - Computadores da sede e armazém
-- `$ipsCCTV` - Sistemas de videovigilância
+- $ipsGateways - Gateways da rede
+- $ipsLojas - Computadores das lojas
+- $ipsWifi - Pontos de acesso WiFi
+- $ipsPC - Computadores da sede e armazém
+- $ipsCCTV - Sistemas de videovigilância
 
-**Nota de Segurança**: Apenas os IPs definidos no config.php serão processados pelo sistema. Não é possível executar pings em IPs externos através de parâmetros ou manipulação do código.
+## Segurança
 
-## Informações Apresentadas
-
-| Campo | Descrição |
-|-------|-----------|
-| ID | Número sequencial |
-| IP | Endereço IP do dispositivo |
-| LOCATION | Localização/Nome do dispositivo |
-| CONNECTION | Estado da ligação (Online/Offline) |
-| TTL | Time To Live da resposta |
-| RTT (ms) | Tempo de resposta em milissegundos |
-
-## Detecção Inteligente de Estado
-
-O sistema detecta corretamente:
-- ✅ **Ping bem-sucedido** - Resposta válida com RTT
-- ❌ **Destination host unreachable** - Router responde mas IP não existe
-- ❌ **Request timed out** - Sem resposta no tempo limite
-- ❌ **Could not find host** - Erro de resolução DNS
-
-## Performance
-
-- **Pings paralelos**: Processa até 6 IPs simultaneamente
-- **Timeout otimizado**: 1000ms por ping
-- **Atualização inteligente**: Retry em 10s se erro, 5s se sucesso
+- Sanitização rigorosa de endereços IP
+- Lista branca de IPs configurados
+- Proteção contra injeção de comandos
+- Validação tripla com filter_var()
+- Verificação de referer HTTP
 
 ## Tecnologias
 
-- **Frontend**: HTML5, CSS3 responsivo, JavaScript ES6
-- **Backend**: PHP com validações de segurança avançadas
-- **Comando**: Windows ping (protegido contra injeção)
-- **Atualização**: AJAX com fetch API
-- **Segurança**: Sanitização, validação e lista branca de IPs
+- Frontend: HTML5, CSS3, JavaScript ES6
+- Backend: PHP 7.0+
+- Comando: Windows ping protegido
+- Atualização: AJAX com fetch API
