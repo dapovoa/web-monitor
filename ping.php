@@ -4,7 +4,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// Verificação de referer para segurança
+// CSRF protection
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
 $host = $_SERVER['HTTP_HOST'] ?? '';
 
@@ -15,9 +15,17 @@ if (!empty($referer) && !str_contains($referer, $host)) {
 
 include 'config.php';
 
-/**
- * Sanitiza e valida um endereço IP
- */
+function getPingCommand($ip) {
+    $os = strtoupper(PHP_OS);
+
+    // Auto-detect OS and return appropriate ping command
+    if (strpos($os, 'WIN') !== false) {
+        return "C:\\Windows\\System32\\ping.exe -n 1 -w 1500 " . escapeshellarg($ip);
+    } else {
+        return "ping -c 1 -W 1.5 " . escapeshellarg($ip);
+    }
+}
+
 function sanitizeIP($ip) {
     $ip = preg_replace('/[^0-9.]/', '', trim($ip));
     
@@ -36,21 +44,15 @@ function sanitizeIP($ip) {
     return $ip;
 }
 
-/**
- * Verifica se o IP está configurado
- */
 function isValidConfigIP($ip, $all_configured_ips) {
     return array_key_exists($ip, $all_configured_ips);
 }
 
-/**
- * Ping sequencial
- */
 function pingStatusSequential($ip) {
     $output = [];
     $returnCode = -1;
-    $command = "C:\\Windows\\System32\\ping.exe -n 1 -w 1000 " . escapeshellarg($ip);
-    
+    $command = getPingCommand($ip);
+
     exec($command, $output, $returnCode);
     
     $rtt = "N/A";
@@ -90,15 +92,12 @@ function pingStatusSequential($ip) {
     return ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "status" => false];
 }
 
-/**
- * Ping paralelo
- */
 function pingBatchParallel($ips_batch) {
     $processes = [];
     $results = [];
-    
+
     foreach ($ips_batch as $ip) {
-        $command = "C:\\Windows\\System32\\ping.exe -n 1 -w 1500 " . escapeshellarg($ip);
+        $command = getPingCommand($ip);
         $descriptors = [
             0 => ["pipe", "r"],
             1 => ["pipe", "w"],
@@ -168,7 +167,6 @@ function pingBatchParallel($ips_batch) {
     return $results;
 }
 
-// Processamento principal
 $results = [];
 $all_ips_to_ping = [];
 
@@ -192,7 +190,6 @@ if (isset($ipsCCTV) && is_array($ipsCCTV)) {
     $all_ips_to_ping = array_merge($all_ips_to_ping, $ipsCCTV);
 }
 
-// Se não há IPs, retorna array vazio (sem erro)
 if (empty($all_ips_to_ping)) {
     echo json_encode([]);
     exit;
@@ -211,16 +208,16 @@ foreach ($ips_only as $ip) {
     }
 }
 
-// Se não há IPs válidos, retorna array vazio (debug no console JS)
 if (empty($safe_ips)) {
     echo json_encode([]);
     exit;
 }
 
+// Use parallel execution if available, otherwise fallback to sequential
 try {
     if (function_exists('proc_open')) {
         $batches = array_chunk($safe_ips, 6);
-        
+
         foreach ($batches as $batch) {
             $batch_results = pingBatchParallel($batch);
             $results = array_merge($results, $batch_results);

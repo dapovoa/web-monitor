@@ -30,9 +30,9 @@ Browser
 
 ### Execution Flow
 
-The backend is built for Windows environments, using the hardcoded path to `C:\Windows\System32\ping.exe`. It runs pings in parallel batches of 6 IPs using `proc_open()` for efficiency. This prevents a few slow devices from blocking the update cycle. If `proc_open()` isn't available, it gracefully falls back to running pings sequentially with `exec()`.
+The backend works on both Windows and Linux with automatic OS detection. It detects the operating system via `PHP_OS` and uses the appropriate ping command. Runs pings in parallel batches of 6 IPs using `proc_open()` for efficiency. This prevents a few slow devices from blocking the update cycle. If `proc_open()` isn't available, it gracefully falls back to running pings sequentially with `exec()`.
 
-The script parses the Windows ping output with regex to extract RTT and TTL, then returns a structured JSON to the frontend. The JavaScript then updates the status indicators in real-time.
+The script parses the ping output with regex to extract RTT and TTL, then returns a structured JSON to the frontend. The JavaScript then updates the status indicators in real-time.
 
 ### Security
 
@@ -57,6 +57,8 @@ web-monitor/
     img/
         favicon.ico
         favicon.png
+        32x32.png
+        192x192.png
         screenshot.png
 ```
 
@@ -76,7 +78,7 @@ web-monitor/
 
 ### Requirements
 
-- **Windows OS** (The backend is hardcoded to use `C:\Windows\System32\ping.exe`)
+- **Windows or Linux OS** (automatic detection)
 - PHP 7.0+ with `proc_open()` and `exec()` enabled
 - A web server (like Apache, Nginx, or IIS)
 
@@ -105,21 +107,18 @@ Finally, deploy the files to your web server and access `index.php` in a browser
 
 ## Customization
 
-You can change the polling interval in `script.js`:
+Change the polling interval in `script.js`:
 ```javascript
 setTimeout(fetchPingData, 5000);  // 5000ms = 5 seconds
 ```
 
-You can adjust the ping timeout in `ping.php`:
+Ping timeout is configured in `ping.php` via `getPingCommand()`:
 ```php
-$command = "C:\\Windows\\System32\\ping.exe -n 1 -w 1500 $ip";  // 1500ms timeout
+// Windows: -w 1500 (1500ms timeout)
+// Linux: -W 1.5 (1.5s timeout)
 ```
 
-To adapt for **Linux**, you would need to modify the ping command in `ping.php`:
-```php
-// Example for Linux
-$command = "ping -c 1 -W 1.5 $ip";
-```
+OS detection is automatic, no manual configuration needed.
 
 ---
 
