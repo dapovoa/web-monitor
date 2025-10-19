@@ -2,7 +2,7 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: #e0e5ec;
+  background-color: #ffffff;
   color: #555;
   padding: 2rem;
 }
@@ -17,7 +17,7 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   color: #374151;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   margin-bottom: 1.5rem;
   text-transform: uppercase;
   padding-bottom: 0.5rem;
@@ -47,14 +47,14 @@ body {
 .device-card {
   border-radius: 20px;
   padding: 1.5rem;
-  background: #e0e5ec;
-  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #ffffff;
+  background: #ffffff;
+  box-shadow: 12px 12px 24px #c0c0c0, -12px -12px 24px #f0f0f0;
   transition: all 0.3s ease-in-out;
   border-left: 4px solid transparent;
 }
 
 .device-card:hover {
-  box-shadow: inset 9px 9px 16px #a3b1c6, inset -9px -9px 16px #ffffff;
+  box-shadow: inset 12px 12px 24px #c0c0c0, inset -12px -12px 24px #f0f0f0;
 }
 
 .card-header {
@@ -68,8 +68,8 @@ body {
   height: 15px;
   border-radius: 50%;
   margin-right: 1rem;
-  background-color: #ccc; /* Default color */
-  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #ffffff;
+  background-color: #ccc;
+  box-shadow: inset 2px 2px 4px #c0c0c0, inset -2px -2px 4px #f0f0f0;
 }
 
 .device-card.online {
@@ -131,11 +131,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #e0e5ec;
+  background: #ffffff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #a3b1c6;
+  background-color: #c0c0c0;
   border-radius: 20px;
-  border: 3px solid #e0e5ec;
+  border: 3px solid #ffffff;
 }

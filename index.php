@@ -62,15 +62,15 @@ ATUALIZADO : 19-OUT-2025
     echo '<div class="main-container">';
     
     if (isset($ipsGateways) && !empty($ipsGateways)) {
-        echo generateDeviceGrid($ipsGateways, 'GATEWAY');
+        echo generateDeviceGrid($ipsGateways, 'GLOBAL GATEWAY');
     }
     
     if (isset($ipsLojas) && !empty($ipsLojas)) {
-        echo generateDeviceGrid($ipsLojas, 'COMPUTERS');
+        echo generateDeviceGrid($ipsLojas, 'LOCAL STORES');
     }
     
     if (isset($ipsWifi) && !empty($ipsWifi)) {
-        echo generateDeviceGrid($ipsWifi, 'WI-FI');
+        echo generateDeviceGrid($ipsWifi, 'GLOBAL WI-FI');
     }
     
     if (isset($ipsPC) && !empty($ipsPC)) {
