@@ -1,42 +1,51 @@
-# Web Monitor
+# Web Monitor Dashboard
 
 ![Web Monitor Dashboard](img/screenshot.png)
 
-A real-time network monitoring dashboard. It pings a list of configured devices and displays their status in a clean web interface.
+A straightforward network monitoring dashboard. You configure your devices, and it pings them every 5 seconds to show you what's online, what's down, and how things are performing.
 
 ---
 
-## What it Does
+## What It Does
 
-This tool monitors network devices and displays their connectivity status at a glance. It indicates whether a device is online or offline and shows its latency (RTT) and TTL values.
+This dashboard monitors network devices and shows their status in real-time. Think of it as replacing the tedious process of manually pinging devices one by one. Instead, you get a live overview that updates automatically.
 
-The main goal is to replace the tedious process of manually pinging multiple devices with an always-updated overview that refreshes every 5 seconds.
+Each device shows whether it's online or offline, plus key metrics like RTT (latency), TTL, and packet loss. The interface is clean and gets straight to the point.
 
 ---
 
-## How it Works
+## The Interface
 
-The architecture is straightforward:
+The dashboard is built around two main areas:
+
+**Summary Cards** - At the top, you get quick stats for each category (Gateways, Stores, Wi-Fi, Office, CCTV). Each card shows total device count, how many are up or down, and an uptime percentage bar. Icons change color based on health: green when everything's good, yellow if there are some issues, red if things are down.
+
+**Accordion Sections** - Click any category to expand and see individual devices. Each device card shows its name, IP, current status, and three metrics: RTT, TTL, and packet loss. Only one section expands at a time to keep things tidy.
+
+The layout is responsive and works across different screen sizes, from phones to 4K displays. Everything fits on one screen without scrolling when collapsed.
+
+---
+
+## How It Works
+
+The architecture is simple:
 
 ```
 Browser
-    index.php renders the interface
-    script.js polls ping.php every 5 seconds
-        ping.php validates IPs against an allowlist
-        ping.php executes parallel pings
-        ping.php returns JSON with results
-    script.js updates the DOM
+    index.php - renders the interface
+    script.js - polls ping.php every 5 seconds
+        ping.php - validates IPs against allowlist
+        ping.php - executes parallel pings
+        ping.php - returns JSON results
+    script.js - updates the display
 ```
 
-### Execution Flow
+### Backend
 
-The backend works on both Windows and Linux with automatic OS detection. It detects the operating system via `PHP_OS` and uses the appropriate ping command. Runs pings in parallel batches of 6 IPs using `proc_open()` for efficiency. This prevents a few slow devices from blocking the update cycle. If `proc_open()` isn't available, it gracefully falls back to running pings sequentially with `exec()`.
+The backend detects whether it's running on Windows or Linux and adjusts the ping commands accordingly. It runs pings in parallel batches of 6 using `proc_open()` to keep things fast. If that's not available, it falls back to sequential execution with `exec()`.
 
-The script parses the ping output with regex to extract RTT and TTL, then returns a structured JSON to the frontend. The JavaScript then updates the status indicators in real-time.
+Ping results get parsed with regex to extract RTT and TTL values, then sent back to the frontend as JSON. The whole cycle repeats every 5 seconds.
 
-### Security
-
-For security, the script will only ever ping IPs that are explicitly defined in `config.php`. This allowlist approach prevents the tool from being used to ping arbitrary addresses on the network. It also includes input validation and referer checks as extra layers of protection.
 
 ---
 
@@ -44,16 +53,13 @@ For security, the script will only ever ping IPs that are explicitly defined in 
 
 ```
 web-monitor/
-    index.php              Renders the UI
-    ping.php               Backend API
-    config.php             IP lists and allowlist
-
+    index.php
+    ping.php
+    config.php
     js/
-        script.js          Polling and DOM updates
-
+        script.js
     css/
-        estilo.css         Neumorphic styling
-
+        style.css
     img/
         favicon.ico
         favicon.png
@@ -62,34 +68,23 @@ web-monitor/
         screenshot.png
 ```
 
-**index.php** - The entry point. It loads the configuration and renders the initial device cards.
-
-**ping.php** - Executes pings in parallel, parses the results, and returns them as JSON.
-
-**config.php** - Where you define your devices, organized by category (e.g., Gateways, Store PCs, WiFi, Workstations, CCTV).
-
-**script.js** - Polls the backend every 5 seconds and updates the status, RTT, and TTL in the interface.
-
-**estilo.css** - The stylesheet for the neumorphic design, including the color-coded status indicators.
-
 ---
 
 ## Setup
 
 ### Requirements
 
-- **Windows or Linux OS** (automatic detection)
+- Windows or Linux (auto-detected)
 - PHP 7.0+ with `proc_open()` and `exec()` enabled
-- A web server (like Apache, Nginx, or IIS)
+- A web server (Apache, Nginx, IIS, etc.)
 
 ### Installation
 
-Clone the repository:
 ```bash
 git clone https://github.com/dapovoa/web-monitor.git
 ```
 
-Then, edit `config.php` with your devices:
+Edit `config.php` with your devices:
 ```php
 $ipsGateways = [
     '192.168.1.1' => 'Main Gateway',
@@ -101,30 +96,33 @@ $ipsLojas = [
     '192.168.10.2' => 'Store Porto',
 ];
 ```
-Finally, deploy the files to your web server and access `index.php` in a browser.
 
 ---
 
 ## Customization
 
-Change the polling interval in `script.js`:
+**Polling interval** - Change it in `script.js`:
 ```javascript
-setTimeout(fetchPingData, 5000);  // 5000ms = 5 seconds
+setTimeout(fetchPingData, 5000);  // milliseconds
 ```
 
-Ping timeout is configured in `ping.php` via `getPingCommand()`:
+**Ping timeout** - Set in `ping.php` via `getPingCommand()`:
 ```php
-// Windows: -w 1500 (1500ms timeout)
-// Linux: -W 1.5 (1.5s timeout)
+// Windows: -w 1500 (1500ms)
+// Linux: -W 1.5 (1.5s)
 ```
 
-OS detection is automatic, no manual configuration needed.
+**Styling** - The background uses a subtle grid pattern on white. You can change colors and patterns in `style.css`.
+
+OS detection happens automatically, no config needed.
 
 ---
 
 ## Performance
 
-The parallel execution handles approximately 99 devices (tested across 17 batches) with a 5-second update interval. For significantly larger networks, consider increasing the batch size or implementing a caching layer.
+Parallel execution handles around 99 devices across 17 batches with 5-second refresh intervals. For larger deployments, consider bumping the batch size or adding caching.
+
+The accordion layout helps keep things snappy since only one category expands at a time.
 
 ---
 

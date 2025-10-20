@@ -4,7 +4,6 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// CSRF protection
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
 $host = $_SERVER['HTTP_HOST'] ?? '';
 
@@ -18,7 +17,6 @@ include 'config.php';
 function getPingCommand($ip) {
     $os = strtoupper(PHP_OS);
 
-    // Auto-detect OS and return appropriate ping command
     if (strpos($os, 'WIN') !== false) {
         return "C:\\Windows\\System32\\ping.exe -n 1 -w 1500 " . escapeshellarg($ip);
     } else {
@@ -213,7 +211,6 @@ if (empty($safe_ips)) {
     exit;
 }
 
-// Use parallel execution if available, otherwise fallback to sequential
 try {
     if (function_exists('proc_open')) {
         $batches = array_chunk($safe_ips, 6);
