@@ -18,9 +18,9 @@ function getPingCommand($ip) {
     $os = strtoupper(PHP_OS);
 
     if (strpos($os, 'WIN') !== false) {
-        return "C:\\Windows\\System32\\ping.exe -n 1 -w 1500 " . escapeshellarg($ip);
+        return "C:\\Windows\\System32\\ping.exe -n 3 -w 3000 " . escapeshellarg($ip);
     } else {
-        return "ping -c 1 -W 1.5 " . escapeshellarg($ip);
+        return "ping -c 3 -W 3 " . escapeshellarg($ip);
     }
 }
 
@@ -52,42 +52,59 @@ function pingStatusSequential($ip) {
     $command = getPingCommand($ip);
 
     exec($command, $output, $returnCode);
-    
+
     $rtt = "N/A";
     $ttl = "N/A";
+    $loss = 100;
     $output_string = implode("\n", $output);
 
-    if (stripos($output_string, 'unreachable') !== false || 
-        stripos($output_string, 'timed out') !== false ||
-        stripos($output_string, 'could not find host') !== false) {
-        return ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "status" => false];
+    $matches_loss = [];
+    if (preg_match('/(\d+)%\s+(?:packet\s+)?loss/i', $output_string, $matches_loss)) {
+        $loss = intval($matches_loss[1]);
+    } elseif (preg_match('/Lost\s*=\s*(\d+)/i', $output_string, $matches_lost)) {
+        $lost = intval($matches_lost[1]);
+        $loss = ($lost * 100) / 3;
     }
-    
-    if ($returnCode === 0) {
+
+    if (stripos($output_string, 'unreachable') !== false ||
+        stripos($output_string, 'timed out') !== false ||
+        stripos($output_string, 'could not find host') !== false ||
+        $loss >= 100) {
+        return ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "loss" => 100, "status" => false];
+    }
+
+    if ($returnCode === 0 || $loss < 100) {
         $matches_rtt = [];
         $matches_ttl = [];
-        
+
         if (preg_match('/time[=<](.+?)ms/i', $output_string, $matches_rtt)) {
             $rtt_value_str = str_replace(['<', '='], '', $matches_rtt[1]);
             $rtt_val = floatval($rtt_value_str);
-            
+
             if ($rtt_val < 1 && $rtt_val > 0) {
-                $rtt = "<1 ms";
+                $rtt = "<1";
             } else {
-                $rtt = number_format($rtt_val, 0) . ' ms';
+                $rtt = number_format($rtt_val, 0);
             }
         }
-        
+
+        if (preg_match('/rtt.*=.*\/(.+?)\/.*\//i', $output_string, $matches_avg)) {
+            $rtt_val = floatval($matches_avg[1]);
+            if ($rtt_val < 1 && $rtt_val > 0) {
+                $rtt = "<1";
+            } else {
+                $rtt = number_format($rtt_val, 0);
+            }
+        }
+
         if (preg_match('/TTL=(\d+)/i', $output_string, $matches_ttl)) {
             $ttl = $matches_ttl[1];
         }
-        
-        if ($rtt !== "N/A") {
-            return ["ip" => $ip, "rtt" => $rtt, "ttl" => $ttl, "status" => true];
-        }
+
+        return ["ip" => $ip, "rtt" => $rtt, "ttl" => $ttl, "loss" => $loss, "status" => true];
     }
-    
-    return ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "status" => false];
+
+    return ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "loss" => 100, "status" => false];
 }
 
 function pingBatchParallel($ips_batch) {
@@ -101,9 +118,9 @@ function pingBatchParallel($ips_batch) {
             1 => ["pipe", "w"],
             2 => ["pipe", "w"]
         ];
-        
+
         $process = proc_open($command, $descriptors, $pipes);
-        
+
         if (is_resource($process)) {
             fclose($pipes[0]);
             $processes[$ip] = [
@@ -113,55 +130,70 @@ function pingBatchParallel($ips_batch) {
             ];
         }
     }
-    
+
     foreach ($processes as $ip => $proc_data) {
         $output = stream_get_contents($proc_data['stdout']);
         $error = stream_get_contents($proc_data['stderr']);
-        
+
         fclose($proc_data['stdout']);
         fclose($proc_data['stderr']);
-        
+
         $return_code = proc_close($proc_data['process']);
-        
+
         $rtt = "N/A";
         $ttl = "N/A";
-        
-        if (stripos($output, 'unreachable') !== false || 
+        $loss = 100;
+
+        $matches_loss = [];
+        if (preg_match('/(\d+)%\s+(?:packet\s+)?loss/i', $output, $matches_loss)) {
+            $loss = intval($matches_loss[1]);
+        } elseif (preg_match('/Lost\s*=\s*(\d+)/i', $output, $matches_lost)) {
+            $lost = intval($matches_lost[1]);
+            $loss = ($lost * 100) / 3;
+        }
+
+        if (stripos($output, 'unreachable') !== false ||
             stripos($output, 'timed out') !== false ||
-            stripos($output, 'could not find host') !== false) {
-            $results[] = ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "status" => false];
+            stripos($output, 'could not find host') !== false ||
+            $loss >= 100) {
+            $results[] = ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "loss" => 100, "status" => false];
             continue;
         }
-        
-        if ($return_code === 0) {
+
+        if ($return_code === 0 || $loss < 100) {
             $matches_rtt = [];
             $matches_ttl = [];
-            
+
             if (preg_match('/time[=<](.+?)ms/i', $output, $matches_rtt)) {
                 $rtt_value_str = str_replace(['<', '='], '', $matches_rtt[1]);
                 $rtt_val = floatval($rtt_value_str);
-                
+
                 if ($rtt_val < 1 && $rtt_val > 0) {
-                    $rtt = "<1 ms";
+                    $rtt = "<1";
                 } else {
-                    $rtt = number_format($rtt_val, 0) . ' ms';
+                    $rtt = number_format($rtt_val, 0);
                 }
             }
-            
+
+            if (preg_match('/rtt.*=.*\/(.+?)\/.*\//i', $output, $matches_avg)) {
+                $rtt_val = floatval($matches_avg[1]);
+                if ($rtt_val < 1 && $rtt_val > 0) {
+                    $rtt = "<1";
+                } else {
+                    $rtt = number_format($rtt_val, 0);
+                }
+            }
+
             if (preg_match('/TTL=(\d+)/i', $output, $matches_ttl)) {
                 $ttl = $matches_ttl[1];
             }
-            
-            if ($rtt !== "N/A") {
-                $results[] = ["ip" => $ip, "rtt" => $rtt, "ttl" => $ttl, "status" => true];
-            } else {
-                $results[] = ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "status" => false];
-            }
+
+            $results[] = ["ip" => $ip, "rtt" => $rtt, "ttl" => $ttl, "loss" => $loss, "status" => true];
         } else {
-            $results[] = ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "status" => false];
+            $results[] = ["ip" => $ip, "rtt" => "N/A", "ttl" => "N/A", "loss" => 100, "status" => false];
         }
     }
-    
+
     return $results;
 }
 

@@ -106,9 +106,21 @@ function updateCards(data) {
         const lossElem = document.getElementById('loss-' + item.ip);
         const lastCheckElem = document.getElementById('last-check-' + item.ip);
 
-        if (rttElem) rttElem.textContent = item.rtt !== null ? `${item.rtt} ms` : '---';
-        if (ttlElem) ttlElem.textContent = item.ttl !== null ? item.ttl : '---';
-        if (lossElem) lossElem.textContent = item.loss !== null ? `${item.loss}%` : '0%';
+        if (rttElem) {
+            if (item.rtt !== null && item.rtt !== 'N/A') {
+                rttElem.textContent = `${item.rtt} ms`;
+            } else {
+                rttElem.textContent = '---';
+            }
+        }
+        if (ttlElem) ttlElem.textContent = (item.ttl !== null && item.ttl !== 'N/A') ? item.ttl : '---';
+        if (lossElem) {
+            if (item.loss !== null && item.loss !== undefined) {
+                lossElem.textContent = `${item.loss}%`;
+            } else {
+                lossElem.textContent = '---';
+            }
+        }
         if (lastCheckElem) lastCheckElem.textContent = 'Última verificação: agora';
 
         if (item.status) {
