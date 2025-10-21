@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![PHP](https://img.shields.io/badge/PHP-7.0%2B-777BB4?logo=php)](https://www.php.net/) [![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript) [![CSS3](https://img.shields.io/badge/CSS-3-1572B6?logo=css3)](https://www.w3.org/Style/CSS/Overview.en.html)
+
 # Web Monitor Dashboard
 
 ![Web Monitor Dashboard](img/screenshot.png)
